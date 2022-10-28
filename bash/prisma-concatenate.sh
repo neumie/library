@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 #Variable setup
 prismaPath="./../src/services/prisma/"
