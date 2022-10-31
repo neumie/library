@@ -1,40 +1,37 @@
 #!/bin/bash
 
-#Variable setup
-prismaPath="./../src/services/prisma/"
+prismaPath="./prisma/"
 schemaName="schema.prisma"
-schemaPath="$prismaPath$schemaName"
+directory="./src"
 
-#Path to the files to concatenate
-collectionPath="../schemas/"
+#getopts is a built-in bash feature
+while getopts ':p:n:d:' OPTION; do
+    case $OPTION in
+        p)
+        prismaPath=$OPTARG
+        ;;
+        n)
+        schemaName=$OPTARG
+        ;;
+        d)
+        directory=$OPTARG
+        ;;
+        ?)
+        echo "script usage: $0 [-p <path to prisma>] [-n <schema name>] [-d <directory to search files in>]" >&2
+        exit 0
+        ;;
+    esac
+done
 
-#Check if the necessary directories exist and if there is at least 1 file to concatenate
-if ! [[ -d "$prismaPath" ]]
-then
-	echo "The directory $prismaPath doesn't exist!"
-	exit 0
-elif ! [[ -d "$collectionPath" ]]
-then
-	echo "The directory $collectionPath doesn't exist!"
-	exit 0
-elif ! [[ $(ls ./$collectionPath | wc -l) > 0 ]]
-then
-	echo "The directory $collectionPath is empty!"
-	exit 0
-fi	
+schemaPath=$prismaPath$schemaName
 
-#Remove the old schema if it exists
+#Remove preexisting schema
 rm -f $schemaPath
 
-#Create empty schema file
-touch $schemaPath
-
-#Concatenate all the files together
-for file in $collectionPath*
-do
-	cat $file >> $schemaPath
+#Look for all .prisma files and concatenate them into the main file
+for file in `find ./src -type f -name "*.prisma"`; do
+    cat $file >> $schemaPath
 	echo "" >> $schemaPath
 done
 
-echo "Concatenation of schema files finished."
 exit 0
